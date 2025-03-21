@@ -4,191 +4,239 @@
   <meta charset="UTF-8">
   <title>CHIL Hub - Connexion</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * { box-sizing: border-box; }
+ <style>
+  * {
+    box-sizing: border-box;
+  }
 
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #000;
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+  body {
+    margin: 0;
+    padding: 20px;
+    background-color: #000;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .lang-select {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #111;
+    border: 1px solid #444;
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    z-index: 100;
+  }
+
+  .logo {
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 80px 0 20px 0;
+    text-align: center;
+  }
+
+  .chil {
+    color: white;
+  }
+
+  .hub {
+    background-color: orange;
+    color: black;
+    padding: 0 10px;
+    border-radius: 5px;
+  }
+
+  .form-container {
+    background-color: #1a1a1a;
+    padding: 25px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .form-container input {
+    width: 100%;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+  }
+
+  button {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    background-color: orange;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .error {
+    color: red;
+    font-size: 0.9rem;
+    min-height: 20px;
+    text-align: center;
+  }
+
+  .switch-zone {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .switch-zone span {
+    color: #999;
+  }
+
+  .switch-zone .link {
+    color: #00aaff;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .bar {
+    margin-top: 10px;
+    width: 80%;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  #final-message {
+    display: none;
+    text-align: center;
+    margin-top: 25px;
+    max-width: 90%;
+  }
+
+  #loader {
+    display: none;
+    margin: 10px auto;
+    width: 40px;
+    height: 40px;
+    border: 4px solid transparent;
+    border-top: 4px solid orange;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
     }
+  }
 
-    .lang-select {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background-color: #111;
-      border: 1px solid #444;
-      color: white;
-      padding: 5px;
-      border-radius: 5px;
-    }
+  .waiting-payment {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: #ffaa00;
+    margin-top: 20px;
+  }
 
+  .semi-spinner {
+    width: 16px;
+    height: 16px;
+    border: 3px solid #ffaa00;
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  #back-btn {
+    width: auto;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    background-color: #ffaa00;
+    color: black;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+
+  .btc-box {
+    background-color: #222;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #eee;
+    text-align: left;
+    word-wrap: break-word;
+    max-width: 100%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+  }
+
+  #qr-code {
+    margin-top: 15px;
+    width: 150px;
+    height: 150px;
+  }
+
+  #inscription-fields,
+  #connexion-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  #copy-btn {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    padding: 8px 14px;
+    background-color: #ffaa00;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  #copy-confirm {
+    color: #0f0;
+    display: none;
+    margin-top: 5px;
+    font-size: 0.85rem;
+  }
+
+  /* Responsive mobile adjustments */
+  @media (max-width: 480px) {
     .logo {
-      font-size: 4rem;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    .chil { color: white; }
-
-    .hub {
-      background-color: orange;
-      color: black;
-      padding: 0 10px;
-      border-radius: 5px;
+      font-size: 2.5rem;
     }
 
     .form-container {
-      background-color: #1a1a1a;
-      padding: 30px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 400px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      align-items: center;
+      padding: 20px;
     }
 
-    .form-container input {
-      width: 100%;
-      padding: 10px;
-      background-color: #333;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      font-size: 1rem;
-      font-weight: bold;
-      background-color: orange;
-      color: black;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .error {
-      color: red;
+    button, #back-btn, #copy-btn {
       font-size: 0.9rem;
-      min-height: 20px;
     }
 
-    .switch-zone {
-      margin-top: 20px;
-      text-align: center;
+    .btc-box {
+      font-size: 0.9rem;
+      padding: 12px;
     }
+  }
+</style>
 
-    .switch-zone span { color: #999; }
-
-    .switch-zone .link {
-      color: #00aaff;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    .bar {
-      margin-top: 10px;
-      width: 80%;
-      height: 1px;
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    #final-message {
-      display: none;
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    #loader {
-      display: none;
-      margin: 10px auto;
-      width: 40px;
-      height: 40px;
-      border: 4px solid transparent;
-      border-top: 4px solid orange;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .waiting-payment {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.95rem;
-      color: #ffaa00;
-      margin-top: 20px;
-    }
-
-    .semi-spinner {
-      width: 16px;
-      height: 16px;
-      border: 3px solid #ffaa00;
-      border-top: 3px solid transparent;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    #back-btn {
-  width: auto;
-  padding: 8px 14px;
-  font-size: 0.85rem;
-  background-color: #ffaa00;
-  color: black;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-}
-.btc-box {
-  background-color: #222;
-  padding: 15px;
-  border-radius: 8px;
-  margin-top: 20px;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: #eee;
-  text-align: left;
-  word-wrap: break-word;
-  max-width: 90%;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
-}
-
-#qr-code {
-  margin-top: 15px;
-  width: 150px;
-  height: 150px;
-}
-#inscription-fields {
-  display: none;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-}
-
-#connexion-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-}
-
-  </style>
 </head>
 <body>
 
