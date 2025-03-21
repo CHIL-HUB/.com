@@ -250,7 +250,7 @@
   </div>
 
   <form id="auth-form" class="form-container">
-    <h2 id="form-title">Connexion</h2>
+    <h2 id="form-title"></h2>
 
     <div id="connexion-fields">
       <input type="text" placeholder="Secret pseudo" id="secret-pseudo">
@@ -278,8 +278,10 @@
   <div class="bar"></div>
 
   <div class="switch-zone">
-    <span id="switch-text">Vous n’avez pas de compte ? </span><span class="link" id="switch-link">Créez-en un</span>
+    <span id="switch-text">Vous n’avez pas de compte ? </span>
+    <span class="link" id="switch-link">Créez-en un</span>
   </div>
+  
 
   <div id="final-message">
     <p id="thanks-message">Merci d’avoir créé un compte, <span id="user-pseudo"></span> !</p>
@@ -298,194 +300,209 @@
     <button onclick="location.reload()" id="back-btn">Retour à la connexion</button>
   </div>
 
+  
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-  <script>
-    const langSelect = document.getElementById("lang");
-  
-    const translations = {
-      fr: {
-        title: "Connexion",
-        switchText: "Vous n’avez pas de compte ? ",
-        switchLink: "Créez-en un",
-        validate: "Valider",
-        captchaLabel: "Anti-robot : combien font",
-        errorCaptcha: "Captcha échoué. Veuillez réessayer.",
-        errorFields: "Veuillez remplir tous les champs.",
-        errorWrong: "Identifiant incorrect ou compte non actif.",
-        errorPin: "Le code PIN doit contenir exactement 6 chiffres.",
-        errorPass: "Le mot de passe doit contenir au moins 6 caractères.",
-        thanks: "Merci d’avoir créé un compte, ",
-        wait: "En attente de paiement...",
-        back: "Retour à la connexion"
-      },
-      en: {
-        title: "Login",
-        switchText: "Don't have an account? ",
-        switchLink: "Create one",
-        validate: "Submit",
-        captchaLabel: "Anti-bot: how much is",
-        errorCaptcha: "Captcha failed. Try again.",
-        errorFields: "Please fill in all fields.",
-        errorWrong: "Wrong login or inactive account.",
-        errorPin: "PIN must be exactly 6 digits.",
-        errorPass: "Password must be at least 6 characters.",
-        thanks: "Thanks for creating an account, ",
-        wait: "Waiting for payment...",
-        back: "Back to login"
-      }
-    };
-  
-    function updateLanguage() {
-      const lang = langSelect.value;
-      const t = translations[lang];
-  
-      document.getElementById("form-title").innerText = t.title;
-      document.getElementById("switch-text").innerText = t.switchText;
-      document.getElementById("switch-link").innerText = t.switchLink;
-      document.getElementById("validate-btn").innerText = t.validate;
-      document.getElementById("captcha-question").innerText = `${t.captchaLabel} ${captcha.question} ?`;
-      document.getElementById("thanks-message").childNodes[0].nodeValue = t.thanks;
-      document.getElementById("waiting-text").innerText = t.wait;
-      document.getElementById("back-btn").innerText = t.back;
+<script>
+  const langSelect = document.getElementById("lang");
+
+  const translations = {
+    fr: {
+      title: "Connexion",
+      switchText: "Vous n’avez pas de compte ? ",
+      switchLink: "Créez-en un",
+      switchTextAlt: "Vous avez déjà un compte ? ",
+      switchLinkAlt: "Connectez-vous",
+      validate: "Valider",
+      captchaLabel: "Anti-robot : combien font",
+      errorCaptcha: "Captcha échoué. Veuillez réessayer.",
+      errorFields: "Veuillez remplir tous les champs.",
+      errorWrong: "Identifiant incorrect ou compte non actif.",
+      errorPin: "Le code PIN doit contenir exactement 6 chiffres.",
+      errorPass: "Le mot de passe doit contenir au moins 6 caractères.",
+      thanks: "Merci d’avoir créé un compte, ",
+      wait: "En attente de paiement...",
+      back: "Retour à la connexion"
+    },
+    en: {
+      title: "Login",
+      switchText: "Don't have an account? ",
+      switchLink: "Create one",
+      switchTextAlt: "Already have an account? ",
+      switchLinkAlt: "Log in",
+      validate: "Submit",
+      captchaLabel: "Anti-bot: how much is",
+      errorCaptcha: "Captcha failed. Try again.",
+      errorFields: "Please fill in all fields.",
+      errorWrong: "Wrong login or inactive account.",
+      errorPin: "PIN must be exactly 6 digits.",
+      errorPass: "Password must be at least 6 characters.",
+      thanks: "Thanks for creating an account, ",
+      wait: "Waiting for payment...",
+      back: "Back to login"
     }
-  
-    const form = document.getElementById('auth-form');
-    const errorMsg = document.getElementById('error-msg');
-    const loader = document.getElementById('loader');
-    const finalMessage = document.getElementById('final-message');
-    const userPseudo = document.getElementById('user-pseudo');
-    const activationKeyLine = document.getElementById('activation-key-line');
-    const captchaQ = document.getElementById('captcha-question');
-    const captchaInput = document.getElementById('captcha-answer');
-  
-    const btcAddresses = [
-      'bc1q605r47k9432smsdxz3x4zvzqcqgkpr5t5l3swk',
-      'bc1q2z4dpwvd0dcmpwnm7dhje86dp34xh4n5wx5l4j',
-      'bc1qm2x4qt6kmaugjr67g6ww4gv9ys5vue62hzuj0g',
-      'bc1qqgn265zr39wrs7x9emgug9j4x050pkcjqczkcd',
-      'bc1qrgax245hcgzjjdz445y37crh2khck9tsnlhshn'
-    ];
-  
-    function generateCaptcha() {
-      const a = Math.floor(Math.random() * 10 + 1);
-      const b = Math.floor(Math.random() * 10 + 1);
-      const operators = ['+', '-', '*'];
-      const op = operators[Math.floor(Math.random() * operators.length)];
-      return { question: `${a} ${op} ${b}`, answer: eval(`${a}${op}${b}`) };
+  };
+
+  function updateLanguage() {
+    const lang = langSelect.value;
+    const t = translations[lang];
+    const isRegister = document.getElementById('inscription-fields').style.display === "flex";
+
+    document.getElementById("form-title").innerText = isRegister ? (lang === "fr" ? "Inscription" : "Register") : t.title;
+    document.getElementById("switch-text").innerText = isRegister ? t.switchTextAlt : t.switchText;
+    document.getElementById("switch-link").innerText = isRegister ? t.switchLinkAlt : t.switchLink;
+    document.getElementById("validate-btn").innerText = t.validate;
+    document.getElementById("captcha-question").innerText = `${t.captchaLabel} ${captcha.question} ?`;
+    document.getElementById("thanks-message").childNodes[0].nodeValue = t.thanks;
+    document.getElementById("waiting-text").innerText = t.wait;
+    document.getElementById("back-btn").innerText = t.back;
+  }
+
+  const form = document.getElementById('auth-form');
+  const errorMsg = document.getElementById('error-msg');
+  const loader = document.getElementById('loader');
+  const finalMessage = document.getElementById('final-message');
+  const userPseudo = document.getElementById('user-pseudo');
+  const activationKeyLine = document.getElementById('activation-key-line');
+  const captchaQ = document.getElementById('captcha-question');
+  const captchaInput = document.getElementById('captcha-answer');
+
+  const btcAddresses = [
+    'bc1q605r47k9432smsdxz3x4zvzqcqgkpr5t5l3swk',
+    'bc1q2z4dpwvd0dcmpwnm7dhje86dp34xh4n5wx5l4j',
+    'bc1qm2x4qt6kmaugjr67g6ww4gv9ys5vue62hzuj0g',
+    'bc1qqgn265zr39wrs7x9emgug9j4x050pkcjqczkcd',
+    'bc1qrgax245hcgzjjdz445y37crh2khck9tsnlhshn'
+  ];
+
+  function generateCaptcha() {
+    const a = Math.floor(Math.random() * 10 + 1);
+    const b = Math.floor(Math.random() * 10 + 1);
+    const operators = ['+', '-', '*'];
+    const op = operators[Math.floor(Math.random() * operators.length)];
+    return { question: `${a} ${op} ${b}`, answer: eval(`${a}${op}${b}`) };
+  }
+
+  let captcha = generateCaptcha();
+  captchaQ.innerText = `Anti-robot : combien font ${captcha.question} ?`;
+
+  langSelect.addEventListener("change", () => {
+    updateLanguage();
+  });
+
+  document.getElementById('switch-link').addEventListener('click', () => {
+    const isLogin = document.getElementById('inscription-fields').style.display !== "flex";
+    const lang = langSelect.value;
+    const t = translations[lang];
+
+    // Affichage des bons champs
+    document.getElementById('connexion-fields').style.display = isLogin ? "none" : "flex";
+    document.getElementById('inscription-fields').style.display = isLogin ? "flex" : "none";
+
+    // Mise à jour du titre et des textes
+    document.getElementById('form-title').innerText = isLogin ? (lang === "fr" ? "Inscription" : "Register") : t.title;
+    document.getElementById('switch-text').innerText = isLogin ? t.switchTextAlt : t.switchText;
+    document.getElementById('switch-link').innerText = isLogin ? t.switchLinkAlt : t.switchLink;
+
+    // Nouveau captcha
+    captcha = generateCaptcha();
+    captchaQ.innerText = `${t.captchaLabel} ${captcha.question} ?`;
+    captchaInput.value = "";
+    errorMsg.innerText = "";
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const lang = langSelect.value;
+    const t = translations[lang];
+    const isRegister = document.getElementById('inscription-fields').style.display === "flex";
+    errorMsg.innerText = "";
+    loader.style.display = "block";
+
+    if (parseInt(captchaInput.value) !== captcha.answer) {
+      setTimeout(() => {
+        loader.style.display = "none";
+        errorMsg.innerText = t.errorCaptcha;
+        captcha = generateCaptcha();
+        captchaQ.innerText = `${t.captchaLabel} ${captcha.question} ?`;
+        captchaInput.value = "";
+      }, 1500);
+      return;
     }
-  
-    let captcha = generateCaptcha();
-    captchaQ.innerText = `Anti-robot : combien font ${captcha.question} ?`;
-  
-    langSelect.addEventListener("change", () => {
-      updateLanguage();
-    });
-  
-    document.getElementById('switch-link').addEventListener('click', () => {
-      const isLogin = document.getElementById('inscription-fields').style.display !== "flex";
-  
-      document.getElementById('form-title').innerText = translations[langSelect.value].title;
-      document.getElementById('connexion-fields').style.display = isLogin ? "none" : "flex";
-      document.getElementById('inscription-fields').style.display = isLogin ? "flex" : "none";
-      document.getElementById('switch-link').innerText = translations[langSelect.value].switchLink;
-      document.getElementById('switch-text').innerText = translations[langSelect.value].switchText;
-  
-      captcha = generateCaptcha();
-      captchaQ.innerText = `${translations[langSelect.value].captchaLabel} ${captcha.question} ?`;
-      captchaInput.value = "";
-      errorMsg.innerText = "";
-    });
-  
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-  
-      const lang = langSelect.value;
-      const t = translations[lang];
-      const isRegister = document.getElementById('inscription-fields').style.display === "flex";
-      errorMsg.innerText = "";
-      loader.style.display = "block";
-  
-      if (parseInt(captchaInput.value) !== captcha.answer) {
-        setTimeout(() => {
-          loader.style.display = "none";
-          errorMsg.innerText = t.errorCaptcha;
-          captcha = generateCaptcha();
-          captchaQ.innerText = `${t.captchaLabel} ${captcha.question} ?`;
-          captchaInput.value = "";
-        }, 1500);
+
+    if (!isRegister) {
+      const secretPseudo = document.getElementById('secret-pseudo').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      setTimeout(() => {
+        loader.style.display = "none";
+        if (!secretPseudo || !password) {
+          errorMsg.innerText = t.errorFields;
+        } else {
+          errorMsg.innerText = t.errorWrong;
+        }
+        captcha = generateCaptcha();
+        captchaQ.innerText = `${t.captchaLabel} ${captcha.question} ?`;
+        captchaInput.value = "";
+      }, 1500);
+
+    } else {
+      const pseudo = document.getElementById('pseudo').value.trim();
+      const newSecret = document.getElementById('new-secret').value.trim();
+      const newPassword = document.getElementById('new-password').value.trim();
+      const pin = document.getElementById('pin').value.trim();
+
+      if (!pseudo || !newSecret || !newPassword || !pin) {
+        loader.style.display = "none";
+        errorMsg.innerText = t.errorFields;
         return;
       }
-  
-      if (!isRegister) {
-        const secretPseudo = document.getElementById('secret-pseudo').value.trim();
-        const password = document.getElementById('password').value.trim();
-  
-        setTimeout(() => {
-          loader.style.display = "none";
-          if (!secretPseudo || !password) {
-            errorMsg.innerText = t.errorFields;
-          } else {
-            errorMsg.innerText = t.errorWrong;
-          }
-          captcha = generateCaptcha();
-          captchaQ.innerText = `${t.captchaLabel} ${captcha.question} ?`;
-          captchaInput.value = "";
-        }, 1500);
-  
-      } else {
-        const pseudo = document.getElementById('pseudo').value.trim();
-        const newSecret = document.getElementById('new-secret').value.trim();
-        const newPassword = document.getElementById('new-password').value.trim();
-        const pin = document.getElementById('pin').value.trim();
-  
-        if (!pseudo || !newSecret || !newPassword || !pin) {
-          loader.style.display = "none";
-          errorMsg.innerText = t.errorFields;
-          return;
-        }
-  
-        if (!/^\d{6}$/.test(pin)) {
-          loader.style.display = "none";
-          errorMsg.innerText = t.errorPin;
-          return;
-        }
-  
-        if (newPassword.length < 6) {
-          loader.style.display = "none";
-          errorMsg.innerText = t.errorPass;
-          return;
-        }
-  
-        setTimeout(() => {
-          loader.style.display = "none";
-          form.style.display = "none";
-          document.querySelector('.switch-zone').style.display = "none";
-          document.querySelector('.bar').style.display = "none";
-  
-          const selectedAddress = btcAddresses[Math.floor(Math.random() * btcAddresses.length)];
-          userPseudo.innerText = pseudo;
-  
-          activationKeyLine.innerHTML =
-            lang === "fr"
-              ? `Pour activer votre compte pour une durée de 1 an, veuillez verser 55 $ en Bitcoin (BTC) à l'adresse suivante :<br><strong>${selectedAddress}</strong>`
-              : `To activate your account for 1 year, please send $55 in Bitcoin (BTC) to the following address:<br><strong>${selectedAddress}</strong>`;
-  
-          // QR Code
-          const qr = new QRious({
-            element: document.getElementById("qr-code"),
-            value: selectedAddress,
-            size: 150,
-            background: "#000",
-            foreground: "#ffaa00"
-          });
-  
-          finalMessage.style.display = "block";
-          updateLanguage();
-        }, 1500);
+
+      if (!/^\d{6}$/.test(pin)) {
+        loader.style.display = "none";
+        errorMsg.innerText = t.errorPin;
+        return;
       }
-    });
-  </script>
-  
+
+      if (newPassword.length < 6) {
+        loader.style.display = "none";
+        errorMsg.innerText = t.errorPass;
+        return;
+      }
+
+      setTimeout(() => {
+        loader.style.display = "none";
+        form.style.display = "none";
+        document.querySelector('.switch-zone').style.display = "none";
+        document.querySelector('.bar').style.display = "none";
+
+        const selectedAddress = btcAddresses[Math.floor(Math.random() * btcAddresses.length)];
+        userPseudo.innerText = pseudo;
+
+        activationKeyLine.innerHTML =
+          lang === "fr"
+            ? `Pour activer votre compte pour une durée de 1 an, veuillez verser 55 $ en Bitcoin (BTC) à l'adresse suivante :<br><strong>${selectedAddress}</strong>`
+            : `To activate your account for 1 year, please send $55 in Bitcoin (BTC) to the following address:<br><strong>${selectedAddress}</strong>`;
+
+        const qr = new QRious({
+          element: document.getElementById("qr-code"),
+          value: selectedAddress,
+          size: 150,
+          background: "#000",
+          foreground: "#ffaa00"
+        });
+
+        finalMessage.style.display = "block";
+        updateLanguage();
+      }, 1500);
+    }
+  });
+
+  // Initialisation au chargement
+  document.getElementById("form-title").innerText = translations[langSelect.value].title;
+</script>
+
+
   
 </body>
 </html>
