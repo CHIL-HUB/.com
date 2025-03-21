@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>CHIL Hub - Connexion</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .lang-select {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #111;
+      border: 1px solid #444;
+      color: white;
+      padding: 5px;
+      border-radius: 5px;
+    }
+
+    .logo {
+      font-size: 4rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .chil { color: white; }
+
+    .hub {
+      background-color: orange;
+      color: black;
+      padding: 0 10px;
+      border-radius: 5px;
+    }
+
+    .form-container {
+      background-color: #1a1a1a;
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .form-container input {
+      width: 100%;
+      padding: 10px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      background-color: orange;
+      color: black;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .error {
+      color: red;
+      font-size: 0.9rem;
+      min-height: 20px;
+    }
+
+    .switch-zone {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .switch-zone span { color: #999; }
+
+    .switch-zone .link {
+      color: #00aaff;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .bar {
+      margin-top: 10px;
+      width: 80%;
+      height: 1px;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    #final-message {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    #final-message img {
+      margin-top: 15px;
+      width: 150px;
+      border-radius: 10px;
+    }
+
+    #loader {
+      display: none;
+      margin: 10px auto;
+      width: 40px;
+      height: 40px;
+      border: 4px solid transparent;
+      border-top: 4px solid orange;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .waiting-payment {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      color: #ffaa00;
+      margin-top: 20px;
+    }
+
+    .semi-spinner {
+      width: 16px;
+      height: 16px;
+      border: 3px solid #ffaa00;
+      border-top: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  </style>
+</head>
+<body>
+
+  <select id="lang" class="lang-select">
+    <option value="fr">🇫🇷 Français</option>
+    <option value="en">🇬🇧 English</option>
+  </select>
+
+  <div class="logo">
+    <span class="chil">chil</span><span class="hub">hub</span>
+  </div>
+
+  <form id="auth-form" class="form-container">
+    <h2 id="form-title">Connexion</h2>
+
+    <div id="connexion-fields">
+      <input type="text" placeholder="Secret pseudo" id="secret-pseudo">
+      <input type="password" placeholder="Mot de passe" id="password">
+    </div>
+
+    <div id="inscription-fields" style="display: none;">
+      <input type="text" placeholder="Pseudo" id="pseudo">
+      <input type="text" placeholder="Secret pseudo" id="new-secret">
+      <input type="password" placeholder="Mot de passe" id="new-password">
+      <input type="text" placeholder="Code PIN (6 chiffres)" id="pin">
+    </div>
+
+    <div id="captcha-zone">
+      <p id="captcha-question"></p>
+      <input type="text" placeholder="Réponse" id="captcha-answer">
+    </div>
+
+    <div id="loader"></div>
+    <p class="error" id="error-msg"></p>
+
+    <button type="submit" id="validate-btn">Valider</button>
+  </form>
+
+  <div class="bar"></div>
+
+  <div class="switch-zone">
+    <span id="switch-text">Vous n’avez pas de compte ? </span><span class="link" id="switch-link">Créez-en un</span>
+  </div>
+
+  <div id="final-message">
+    <p id="thanks-message">Merci d’avoir créé un compte, <span id="user-pseudo"></span> !</p>
+    <p id="activation-key-line"></p>
+   
+
+    <div class="waiting-payment">
+      <span id="waiting-text">En attente de paiement...</span>
+      <div class="semi-spinner"></div>
+    </div>
+
+    <br><br>
+    <button onclick="location.reload()" id="back-btn">Retour à la connexion</button>
+  </div>
+
+  <script>
+    const langSelect = document.getElementById("lang");
+
+    const translations = {
+      fr: {
+        title: "Connexion",
+        switchText: "Vous n’avez pas de compte ? ",
+        switchLink: "Créez-en un",
+        validate: "Valider",
+        captchaLabel: "Anti-robot : combien font",
+        errorCaptcha: "Captcha échoué. Veuillez réessayer.",
+        errorFields: "Veuillez remplir tous les champs.",
+        errorWrong: "Identifiant incorrect ou compte non actif.",
+        errorPin: "Le code PIN doit contenir exactement 6 chiffres.",
+        errorPass: "Le mot de passe doit contenir au moins 6 caractères.",
+        thanks: "Merci d’avoir créé un compte, ",
+        wait: "En attente de paiement...",
+        back: "Retour à la connexion"
+      },
+      en: {
+        title: "Login",
+        switchText: "Don't have an account? ",
+        switchLink: "Create one",
+        validate: "Submit",
+        captchaLabel: "Anti-bot: how much is",
+        errorCaptcha: "Captcha failed. Try again.",
+        errorFields: "Please fill in all fields.",
+        errorWrong: "Wrong login or inactive account.",
+        errorPin: "PIN must be exactly 6 digits.",
+        errorPass: "Password must be at least 6 characters.",
+        thanks: "Thanks for creating an account, ",
+        wait: "Waiting for payment...",
+        back: "Back to login"
+      }
+    };
+
+    function updateLanguage() {
+      const lang = langSelect.value;
+      const t = translations[lang];
+
+      document.getElementById("form-title").innerText = t.title;
+      document.getElementById("switch-text").innerText = t.switchText;
+      document.getElementById("switch-link").innerText = t.switchLink;
+      document.getElementById("validate-btn").innerText = t.validate;
+      document.getElementById("captcha-question").innerText = `${t.captchaLabel} ${captcha.question} ?`;
+      document.getElementById("thanks-message").childNodes[0].nodeValue = t.thanks;
+      document.getElementById("waiting-text").innerText = t.wait;
+      document.getElementById("back-btn").innerText = t.back;
+    }
+
+    const form = document.getElementById('auth-form');
+    const errorMsg = document.getElementById('error-msg');
+    const loader = document.getElementById('loader');
+    const finalMessage = document.getElementById('final-message');
+    const userPseudo = document.getElementById('user-pseudo');
+    const activationKeyLine = document.getElementById('activation-key-line');
+    const activationImage = document.getElementById('activation-image');
+    const captchaQ = document.getElementById('captcha-question');
+    const captchaInput = document.getElementById('captcha-answer');
+
+
+
+    function generateCaptcha() {
+      const a = Math.floor(Math.random() * 10 + 1);
+      const b = Math.floor(Math.random() * 10 + 1);
+      const operators = ['+', '-', '*'];
+      const op = operators[Math.floor(Math.random() * operators.length)];
+      return { question: `${a} ${op} ${b}`, answer: eval(`${a}${op}${b}`) };
+    }
+
+    let captcha = generateCaptcha();
+    captchaQ.innerText = `Anti-robot : combien font ${captcha.question} ?`;
+
+    langSelect.addEventListener("change", () => {
+      updateLanguage();
+    });
+
+    document.getElementById('switch-link').addEventListener('click', () => {
+      const isLogin = document.getElementById('inscription-fields').style.display !== "flex";
+
+      document.getElementById('form-title').innerText = isLogin ? translations[langSelect.value].title : translations[langSelect.value].title;
+      document.getElementById('connexion-fields').style.display = isLogin ? "none" : "flex";
+      document.getElementById('inscription-fields').style.display = isLogin ? "flex" : "none";
+      document.getElementById('switch-link').innerText = isLogin ? translations[langSelect.value].switchLink : translations[langSelect.value].switchLink;
+      document.getElementById('switch-text').innerText = isLogin ? translations[langSelect.value].switchText : translations[langSelect.value].switchText;
+
+      captcha = generateCaptcha();
+      captchaQ.innerText = `${translations[langSelect.value].captchaLabel} ${captcha.question} ?`;
+      captchaInput.value = "";
+      errorMsg.innerText = "";
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const lang = langSelect.value;
+      const t = translations[lang];
+      const isRegister = document.getElementById('inscription-fields').style.display === "flex";
+      errorMsg.innerText = "";
+      loader.style.display = "block";
+
+      if (parseInt(captchaInput.value) !== captcha.answer) {
+        setTimeout(() => {
+          loader.style.display = "none";
+          errorMsg.innerText = t.errorCaptcha;
+          captcha = generateCaptcha();
+          captchaQ.innerText = `${t.captchaLabel} ${captcha.question} ?`;
+          captchaInput.value = "";
+        }, 1500);
+        return;
+      }
+
+      if (!isRegister) {
+        const secretPseudo = document.getElementById('secret-pseudo').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        setTimeout(() => {
+          loader.style.display = "none";
+          if (!secretPseudo || !password) {
+            errorMsg.innerText = t.errorFields;
+          } else {
+            errorMsg.innerText = t.errorWrong;
+          }
+          captcha = generateCaptcha();
+          captchaQ.innerText = `${t.captchaLabel} ${captcha.question} ?`;
+          captchaInput.value = "";
+        }, 1500);
+
+      } else {
+        const pseudo = document.getElementById('pseudo').value.trim();
+        const newSecret = document.getElementById('new-secret').value.trim();
+        const newPassword = document.getElementById('new-password').value.trim();
+        const pin = document.getElementById('pin').value.trim();
+
+        if (!pseudo || !newSecret || !newPassword || !pin) {
+          loader.style.display = "none";
+          errorMsg.innerText = t.errorFields;
+          return;
+        }
+
+        if (!/^\d{6}$/.test(pin)) {
+          loader.style.display = "none";
+          errorMsg.innerText = t.errorPin;
+          return;
+        }
+
+        if (newPassword.length < 6) {
+          loader.style.display = "none";
+          errorMsg.innerText = t.errorPass;
+          return;
+        }
+
+        setTimeout(() => {
+          loader.style.display = "none";
+          form.style.display = "none";
+          document.querySelector('.switch-zone').style.display = "none";
+          document.querySelector('.bar').style.display = "none";
+
+          const selected = imageOptions[Math.floor(Math.random() * imageOptions.length)];
+          userPseudo.innerText = pseudo;
+          activationKeyLine.innerHTML = `Pour activer votre compte pour une durée de 1 an, veuillez verser 55 $ en Bitcoin (BTC) à l'adresse suivante :  <strong>${selected.code}</strong>`;
+          activationImage.src = selected.img;
+
+          finalMessage.style.display = "block";
+          updateLanguage();
+        }, 1500);
+      }
+    });
+  </script>
+</body>
+</html>
