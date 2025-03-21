@@ -37,7 +37,7 @@
       margin-bottom: 20px;
     }
 
-    .Chil { color: white; }
+    .chil { color: white; }
 
     .hub {
       background-color: orange;
@@ -112,12 +112,6 @@
       margin-top: 20px;
     }
 
-    #final-message img {
-      margin-top: 15px;
-      width: 150px;
-      border-radius: 10px;
-    }
-
     #loader {
       display: none;
       margin: 10px auto;
@@ -151,6 +145,37 @@
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
+    #back-btn {
+  width: auto;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  background-color: #ffaa00;
+  color: black;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+.btc-box {
+  background-color: #222;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #eee;
+  text-align: left;
+  word-wrap: break-word;
+  max-width: 90%;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+#qr-code {
+  margin-top: 15px;
+  width: 150px;
+  height: 150px;
+}
+
+
   </style>
 </head>
 <body>
@@ -198,8 +223,11 @@
 
   <div id="final-message">
     <p id="thanks-message">Merci d’avoir créé un compte, <span id="user-pseudo"></span> !</p>
-    <p id="activation-key-line"></p>
-   
+    <div class="btc-box">
+      <p id="activation-key-line"></p>
+      <canvas id="qr-code"></canvas>
+    </div>
+    
 
     <div class="waiting-payment">
       <span id="waiting-text">En attente de paiement...</span>
@@ -210,9 +238,10 @@
     <button onclick="location.reload()" id="back-btn">Retour à la connexion</button>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <script>
     const langSelect = document.getElementById("lang");
-
+  
     const translations = {
       fr: {
         title: "Connexion",
@@ -245,11 +274,11 @@
         back: "Back to login"
       }
     };
-
+  
     function updateLanguage() {
       const lang = langSelect.value;
       const t = translations[lang];
-
+  
       document.getElementById("form-title").innerText = t.title;
       document.getElementById("switch-text").innerText = t.switchText;
       document.getElementById("switch-link").innerText = t.switchLink;
@@ -259,19 +288,24 @@
       document.getElementById("waiting-text").innerText = t.wait;
       document.getElementById("back-btn").innerText = t.back;
     }
-
+  
     const form = document.getElementById('auth-form');
     const errorMsg = document.getElementById('error-msg');
     const loader = document.getElementById('loader');
     const finalMessage = document.getElementById('final-message');
     const userPseudo = document.getElementById('user-pseudo');
     const activationKeyLine = document.getElementById('activation-key-line');
-    const activationImage = document.getElementById('activation-image');
     const captchaQ = document.getElementById('captcha-question');
     const captchaInput = document.getElementById('captcha-answer');
-
-
-
+  
+    const btcAddresses = [
+      'bc1qsfdqsdf123abc',
+      'bc1qsdfqsdf456def',
+      'bc1qsdgqsgd789ghi',
+      'bc1qggsdgssdf321jkl',
+      'bc1qqsgdqsdg654mno'
+    ];
+  
     function generateCaptcha() {
       const a = Math.floor(Math.random() * 10 + 1);
       const b = Math.floor(Math.random() * 10 + 1);
@@ -279,38 +313,38 @@
       const op = operators[Math.floor(Math.random() * operators.length)];
       return { question: `${a} ${op} ${b}`, answer: eval(`${a}${op}${b}`) };
     }
-
+  
     let captcha = generateCaptcha();
     captchaQ.innerText = `Anti-robot : combien font ${captcha.question} ?`;
-
+  
     langSelect.addEventListener("change", () => {
       updateLanguage();
     });
-
+  
     document.getElementById('switch-link').addEventListener('click', () => {
       const isLogin = document.getElementById('inscription-fields').style.display !== "flex";
-
-      document.getElementById('form-title').innerText = isLogin ? translations[langSelect.value].title : translations[langSelect.value].title;
+  
+      document.getElementById('form-title').innerText = translations[langSelect.value].title;
       document.getElementById('connexion-fields').style.display = isLogin ? "none" : "flex";
       document.getElementById('inscription-fields').style.display = isLogin ? "flex" : "none";
-      document.getElementById('switch-link').innerText = isLogin ? translations[langSelect.value].switchLink : translations[langSelect.value].switchLink;
-      document.getElementById('switch-text').innerText = isLogin ? translations[langSelect.value].switchText : translations[langSelect.value].switchText;
-
+      document.getElementById('switch-link').innerText = translations[langSelect.value].switchLink;
+      document.getElementById('switch-text').innerText = translations[langSelect.value].switchText;
+  
       captcha = generateCaptcha();
       captchaQ.innerText = `${translations[langSelect.value].captchaLabel} ${captcha.question} ?`;
       captchaInput.value = "";
       errorMsg.innerText = "";
     });
-
+  
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-
+  
       const lang = langSelect.value;
       const t = translations[lang];
       const isRegister = document.getElementById('inscription-fields').style.display === "flex";
       errorMsg.innerText = "";
       loader.style.display = "block";
-
+  
       if (parseInt(captchaInput.value) !== captcha.answer) {
         setTimeout(() => {
           loader.style.display = "none";
@@ -321,11 +355,11 @@
         }, 1500);
         return;
       }
-
+  
       if (!isRegister) {
         const secretPseudo = document.getElementById('secret-pseudo').value.trim();
         const password = document.getElementById('password').value.trim();
-
+  
         setTimeout(() => {
           loader.style.display = "none";
           if (!secretPseudo || !password) {
@@ -337,47 +371,61 @@
           captchaQ.innerText = `${t.captchaLabel} ${captcha.question} ?`;
           captchaInput.value = "";
         }, 1500);
-
+  
       } else {
         const pseudo = document.getElementById('pseudo').value.trim();
         const newSecret = document.getElementById('new-secret').value.trim();
         const newPassword = document.getElementById('new-password').value.trim();
         const pin = document.getElementById('pin').value.trim();
-
+  
         if (!pseudo || !newSecret || !newPassword || !pin) {
           loader.style.display = "none";
           errorMsg.innerText = t.errorFields;
           return;
         }
-
+  
         if (!/^\d{6}$/.test(pin)) {
           loader.style.display = "none";
           errorMsg.innerText = t.errorPin;
           return;
         }
-
+  
         if (newPassword.length < 6) {
           loader.style.display = "none";
           errorMsg.innerText = t.errorPass;
           return;
         }
-
+  
         setTimeout(() => {
           loader.style.display = "none";
           form.style.display = "none";
           document.querySelector('.switch-zone').style.display = "none";
           document.querySelector('.bar').style.display = "none";
-
-          const selected = imageOptions[Math.floor(Math.random() * imageOptions.length)];
+  
+          const selectedAddress = btcAddresses[Math.floor(Math.random() * btcAddresses.length)];
           userPseudo.innerText = pseudo;
-          activationKeyLine.innerHTML = `Pour activer votre compte pour une durée de 1 an, veuillez verser 55 $ en Bitcoin (BTC) à l'adresse suivante :  <strong>${selected.code}</strong>`;
-          activationImage.src = selected.img;
-
+  
+          activationKeyLine.innerHTML =
+            lang === "fr"
+              ? `Pour activer votre compte pour une durée de 1 an, veuillez verser 55 $ en Bitcoin (BTC) à l'adresse suivante :<br><strong>${selectedAddress}</strong>`
+              : `To activate your account for 1 year, please send $55 in Bitcoin (BTC) to the following address:<br><strong>${selectedAddress}</strong>`;
+  
+          // QR Code
+          const qr = new QRious({
+            element: document.getElementById("qr-code"),
+            value: selectedAddress,
+            size: 150,
+            background: "#000",
+            foreground: "#ffaa00"
+          });
+  
           finalMessage.style.display = "block";
           updateLanguage();
         }, 1500);
       }
     });
   </script>
+  
+  
 </body>
 </html>
