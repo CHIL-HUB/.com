@@ -1,0 +1,39 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: black;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  opacity: 0;
+  animation: fadeIn 3s forwards;
+}
+
+.logo {
+  display: flex;
+  font-family: Arial, sans-serif;
+  font-size: 5rem;
+  font-weight: bold;
+}
+
+.chil {
+  color: white;
+}
+
+.hub {
+  background-color: orange;
+  color: black;
+  padding: 0 15px;
+  margin-left: 10px;
+  border-radius: 5px;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
